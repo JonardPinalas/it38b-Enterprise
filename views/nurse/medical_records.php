@@ -23,7 +23,7 @@ $page_title = "Medical Records";
             <p class="text-gray-600 mb-4">Review and manage patient medical histories.</p>
 
             <div class="flex justify-end mb-6">
-                <a href="/it38b-Enterprise/views/nurse/medical_record_form.php"
+                <a href="/it38b-Enterprise/views/nurse/choose_medical_record.php"
                     class="inline-flex items-center px-4 py-2 bg-green-500 hover:bg-green-700 text-white font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition-colors">
                     <i class="fas fa-plus mr-2"></i> Add New Record
                 </a>

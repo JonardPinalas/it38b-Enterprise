@@ -41,6 +41,63 @@ if (!$record) {
     header("Location: /it38b-Enterprise/views/nurse/billing_records.php?error=Record+not+found");
     exit();
 }
+
+function add_billing_record($data)
+{
+    global $conn;
+
+    $appointment_id = isset($data['appointment_id']) ? intval($data['appointment_id']) : 0;
+    $patient_id = isset($data['patient_id']) ? intval($data['patient_id']) : 0;
+    $description = isset($data['description']) ? mysqli_real_escape_string($conn, $data['description']) : '';
+    $amount = isset($data['amount']) ? floatval($data['amount']) : 0.00;
+    $payment_status = isset($data['payment_status']) ? mysqli_real_escape_string($conn, $data['payment_status']) : 'Pending';
+    $payment_method = isset($data['payment_method']) ? mysqli_real_escape_string($conn, $data['payment_method']) : '';
+    $invoice_number = isset($data['invoice_number']) ? mysqli_real_escape_string($conn, $data['invoice_number']) : '';
+    $notes = isset($data['notes']) ? mysqli_real_escape_string($conn, $data['notes']) : '';
+    $record_id = isset($data['record_id']) ? intval($data['record_id']) : null;
+    $created_at = date('Y-m-d H:i:s');
+
+    $sql = "INSERT INTO billing_records (
+                patient_id,
+                description,
+                amount,
+                payment_status,
+                payment_method,
+                invoice_number,
+                notes,
+                record_id,
+                created_at
+                ";
+
+    if ($appointment_id > 0) {
+        $sql .= ", appointment_id";
+    }
+
+    $sql .= ") VALUES (
+                '$patient_id',
+                '$description',
+                '$amount',
+                '$payment_status',
+                '$payment_method',
+                '$invoice_number',
+                '$notes',
+                " . ($record_id !== null ? "'$record_id'" : 'NULL') . ",
+                '$created_at'
+                ";
+
+    if ($appointment_id > 0) {
+        $sql .= ", '$appointment_id'";
+    }
+
+    $sql .= ")";
+
+    if (mysqli_query($conn, $sql)) {
+        return ['success' => true];
+    } else {
+        return ['success' => false, 'error' => "Database error: " . mysqli_error($conn)];
+    }
+}
+?>
 ?>
 <!DOCTYPE html>
 <html lang="en">

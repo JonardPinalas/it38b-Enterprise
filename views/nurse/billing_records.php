@@ -22,7 +22,7 @@ $page_title = "Billing Records";
             <h1 class="text-2xl font-bold text-gray-800 mb-4"><?php echo $page_title; ?></h1>
             <div class="flex justify-between items-center mb-4">
                 <p class="text-gray-600">Manage patient billing records</p>
-                <a href="/it38b-Enterprise/views/nurse/billing_record_form.php"
+                <a href="/it38b-Enterprise/views/nurse/choose_appointment_bill.php"
                     class="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
                     <i class="fas fa-plus mr-2"></i> Add New Bill
                 </a>

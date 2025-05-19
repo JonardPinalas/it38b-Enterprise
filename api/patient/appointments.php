@@ -63,6 +63,50 @@ try {
             ];
             break;
 
+        case 'get':
+            // Get details of a specific appointment
+            $appointment_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+
+            if (!$appointment_id) {
+                throw new Exception('Invalid appointment ID');
+            }
+
+            $query = "
+                SELECT a.*,
+                       d.doctor_id,
+                       u.first_name as doctor_first_name,
+                       u.last_name as doctor_last_name,
+                       s.specialization_name,
+                       DATE_FORMAT(a.appointment_datetime, '%M %d, %Y') as formatted_date,
+                       DATE_FORMAT(a.appointment_datetime, '%h:%i %p') as formatted_time,
+                       DATE_FORMAT(a.appointment_datetime, '%Y-%m-%d') as formatted_date_ymd,
+                       DATE_FORMAT(a.appointment_datetime, '%H:%i') as formatted_time_24hr
+                FROM appointments a
+                JOIN doctors d ON a.doctor_id = d.doctor_id
+                JOIN users u ON d.user_id = u.user_id
+                JOIN specializations s ON d.specialization_id = s.specialization_id
+                JOIN patients p ON a.patient_id = p.patient_id
+                WHERE a.appointment_id = ? AND p.user_id = ?";
+
+            $stmt = mysqli_prepare($conn, $query);
+            mysqli_stmt_bind_param($stmt, "ii", $appointment_id, $user_id);
+            mysqli_stmt_execute($stmt);
+            $result = mysqli_stmt_get_result($stmt);
+            $appointment = mysqli_fetch_assoc($result);
+
+            if ($appointment) {
+                $response = [
+                    'success' => true,
+                    'appointment' => $appointment
+                ];
+            } else {
+                $response = [
+                    'success' => false,
+                    'error' => 'Appointment not found or unauthorized'
+                ];
+            }
+            break;
+
         case 'create':
             // Validate and create new appointment
             $data = json_decode(file_get_contents('php://input'), true);
@@ -156,7 +200,7 @@ try {
             $appointment_id = isset($data['appointment_id']) ? intval($data['appointment_id']) : 0;
 
             if (!$appointment_id || !isset($data['appointment_datetime'])) {
-                throw new Exception('Invalid request data');
+                throw new Exception('Invalid request data for rescheduling');
             }
 
             // Verify ownership
@@ -178,8 +222,8 @@ try {
             $update_query = "
                 UPDATE appointments
                 SET appointment_datetime = ?,
-                    status = 'Requested',
-                    notes = CONCAT(notes, '\\nRescheduled from: ', appointment_datetime)
+                    status = 'Scheduled',
+                    notes = CONCAT(IFNULL(notes, ''), IF(notes IS NULL, '', '\\n'), 'Rescheduled on: ', NOW())
                 WHERE appointment_id = ?";
 
             $stmt = mysqli_prepare($conn, $update_query);
